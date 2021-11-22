@@ -2,7 +2,7 @@
   "name": "Super lista de compras",
   "short_name": "Super lista",
   "theme_color": "#3F51B5",
-  "background_color": "#FF4081",
+  "background_color": "#93c142",
   "display": "standalone",
   "orientation": "any",
   "scope": "/",
