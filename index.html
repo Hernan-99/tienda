@@ -22,7 +22,6 @@
       rel="stylesheet"
       href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css"
     />
-    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
     <link rel="stylesheet" href="css/estilos.css" />
   </head>
   <body>
@@ -56,6 +55,31 @@
         <div class="page-content">
           <!-- CONTENIDO DE LA PWA -->
 
+          <!------------------------->
+          <!-- IMAGEN SUPERMERCADO -->
+          <!------------------------->
+
+          <div class="contenedor_header_img">
+            <img src="images/supermercado.jpg" alt="supermercado" />
+          </div>
+
+          <!---------------------------------------->
+          <!-- BARRA DE PROGRESO DEL BORRADO TOTAL-->
+          <!---------------------------------------->
+          <progress min="0" max="100" value="0"></progress>
+          <!------------------------->
+          <!----- VENTANA MODAL ----->
+          <!------------------------->
+
+          <dialog class="mdl-dialog">
+            <h5 class="mdl-dialog__title">¿Desea borrar toda la lista?</h5>
+            <div class="mdl-dialog__actions">
+              <button type="button" class="mdl-button aceptar">Aceptar</button>
+              <button type="button" class="mdl-button cancelar">
+                Cancelar
+              </button>
+            </div>
+          </dialog>
           <div class="contenedor">
             <!-- CAMPO PARA EL INGRESO DE UN NUEVO PRODUCTO -->
             <div class="mdl-textfield mdl-js-textfield w-40">
@@ -69,12 +93,7 @@
               <!-- BOTON PARA AGREGAR EL PRODUCTO A LA LISTA -->
               <button
                 id="agregar"
-                class="
-                  mdl-button mdl-js-button
-                  mdl-button--fab
-                  mdl-js-ripple-effect
-                  mdl-button--primary
-                "
+                class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--primary"
               >
                 <i class="material-icons">add_shopping_cart</i>
               </button>
@@ -84,12 +103,7 @@
               <!-- BOTON PARA ELIMINAR TODA LA LISTA -->
               <button
                 id="borrar"
-                class="
-                  mdl-button mdl-js-button
-                  mdl-button--raised
-                  mdl-js-ripple-effect
-                  mdl-button--accent
-                "
+                class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent"
               >
                 Borrar <i class="material-icons">delete</i>
               </button>
@@ -101,6 +115,22 @@
       </main>
     </div>
 
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <!------------------------------------------------------------------------->
+    <!-----------------------------LIBRERIA JQUERY----------------------------->
+    <!------------------------------------------------------------------------->
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+
+    <!------------------------------------------------------------------------->
+    <!--------------TAMBLE ENGINE: MOTOR DE PLANTILLA(HANDLEBARS)-------------->
+    <!------------------------------------------------------------------------->
+    <script src="js/handlebars.min-v4.7.7.js"></script>
+
     <script src="js/script.js"></script>
+    <script src="js/api.js"></script>
   </body>
 </html>

@@ -1,149 +1,153 @@
 /*------------------------------------------------*/
 /*---------------VARIABLES GLOBALES---------------*/
 /*------------------------------------------------*/
-const btnAgregar = document.getElementById("agregar");
-const btnBorrar = document.getElementById("borrar");
-const inputIngresar = document.getElementById("ingresar");
-let listaProductos = [
-  { nombre: "Carne", cantidad: 2, precio: 200 },
-  { nombre: "Fideos", cantidad: 3, precio: 110.45 },
-  { nombre: "Manteca", cantidad: 1, precio: 80 },
-  { nombre: "Harina", cantidad: 2, precio: 93.5 },
-];
+const btnAgregar = $("#agregar"); // selector con jquery
+const btnBorrar = $("#borrar"); // selector con jquery
+const inputIngresar = $("#ingresar"); // selector con jquery
+const dialog = $("dialog")[0]; // selector con jquery sin # porque estamos seleccionando la etiqueta y no el id
 
-let crearLista = true;
-let ul;
+let listaProductos = [
+  // { nombre: "Carne", cantidad: 2, precio: 200 },
+  // { nombre: "Fideos", cantidad: 3, precio: 110.45 },
+  // { nombre: "Manteca", cantidad: 1, precio: 80 },
+  // { nombre: "Harina", cantidad: 2, precio: 93.5 },
+];
 
 /*------------------------------------------------*/
 /*---------------FUNCIONES GLOBALES---------------*/
 /*------------------------------------------------*/
 
-function borrarProducto(index) {
-  console.log("hola", index);
-  listaProductos.splice(index, 1);
-  renderLista();
-}
-
-const cambiarValor = (tipo, index, el) => {
-  const valor = el.value;
-  //ternario para que lo pase a number si es precio o a parseInt si es cantidad
-  tipo === "precio" ? Number(valor) : parseInt(valor);
-  console.log(cambiarValor, tipo, index, valor);
-  listaProductos[index][tipo] = valor;
-  // console.dir(el);
+const guardarListaProductos = lista => {
+  let productos = JSON.stringify(lista);
+  localStorage.setItem("LISTA", productos);
 };
 
-const renderLista = () => {
-  if (crearLista) {
-    ul = document.createElement("ul");
-    ul.classList.add("demo-list-icon", "mdl-list", "w-100");
+async function borrarProducto(id) {
+  console.log("hola", id);
+  // listaProductos.splice(id, 1);
+  try {
+    await apiProd.del(id);
+    renderLista();
+  } catch (error) {
+    console.error("Error en borrado de producto con id", id);
   }
-  ul.innerHTML = "";
-  listaProductos.forEach((producto, index) => {
-    console.log(producto, index);
-    ul.innerHTML += `
-<!-- LISTA -->
-            <li class="mdl-list__item">
-            <!-- ICONO DEL PRODUCTO -->
-              <span class="mdl-list__item-primary-content w-10">
-              <i class="material-icons mdl-list__item-icon"
-                  >local_grocery_store</i
-                  >
-                  </span>
-                  
-                  <!-- NOMBRE DEL PRODUCTO -->
-                  <span class="mdl-list__item-primary-content w-30"> ${producto.nombre} </span>
-                  
-                  <!-- CANTIDAD DEL PRODUCTO -->
-                  <span class="mdl-list__item-primary-content w-20">
-                  <!-- Textfield with Floating Label -->
-                <div
-                class="
-                mdl-textfield mdl-js-textfield
-                mdl-textfield--floating-label
-                "
-                >
-                <input onchange="cambiarValor('cantidad', ${index},this)"
-                class="mdl-textfield__input"
-                type="text"
-                value="${producto.cantidad}"
-                id="cantidad-${index}"
-                />
-                <label class="mdl-textfield__label" for="cantidad-${index}"
-                >Cantidad</label
-                >
-                </div>
-                </span>
-                
-                <!-- PRECIO DEL PRODUCTO -->
-                <span class="mdl-list__item-primary-content w-20 ml-icon">
-                <!-- Textfield with Floating Label -->
-                <div
-                class="
-                mdl-textfield mdl-js-textfield
-                mdl-textfield--floating-label
-                "
-                >
-                <input onchange="cambiarValor('precio', ${index}, this)" value="$ ${producto.precio}" class="mdl-textfield__input" type="text" id="precio-${index}" />
-                <label class="mdl-textfield__label" for="precio-${index}"
-                    >Precio($)</label
-                    >
-                    </div>
-                    </span>
-                    <!-- ACCION(boton para borrar producto) -->
-              <span class="mdl-list__item-primary-content w-20 ml-icon">
-              <!-- Colored FAB button with ripple -->
-              <button
-              onclick="borrarProducto(${index})"
-                  class="
-                  mdl-button mdl-js-button
-                    mdl-button--fab
-                    mdl-js-ripple-effect
-                    mdl-button--colored
-                  "
-                  >
-                  <i class="material-icons">remove_shopping_cart</i>
-                  </button>
-              </span>
-              </li>`;
-  });
-  if (crearLista) {
-    document.getElementById("lista").appendChild(ul);
-  } else {
+}
+
+const cambiarValor = async (tipo, id, el) => {
+  const valor = el.value;
+
+  //calculo el index del producto desde el id
+  const index = listaProductos.findIndex(prod => prod.id == id);
+  //ternario para que lo pase a number si es precio o a parseInt si es cantidad
+  tipo === "precio" ? Number(valor) : parseInt(valor);
+  console.log(cambiarValor, tipo, id, index, valor);
+
+  // console.dir(el);
+  listaProductos[index][tipo] = valor;
+
+  //Actualiza el producto en el backend
+  const prod = listaProductos[index];
+  try {
+    await apiProd.put(prod, id);
+  } catch (error) {
+    console.error(`Error en actualizacion de ${tipo} del producto`, error);
+  }
+};
+
+const renderLista = async () => {
+  try {
+    //leer la plantilla handlebars desde un archivo externo
+    // ---con fetch---
+    // const datos = await fetch("../plantilla_lista.hbs");
+    // const plantilla = await datos.json();// esto nos da un error porque la plantilla no es un json
+    // const plantilla = await datos.text();
+    // console.log(typeof plantilla, plantilla);
+
+    // ---con ajax de jquery---
+    const plantilla = await $.ajax({
+      url: "../plantilla_lista.hbs",
+      method: "get",
+    });
+
+    /*COMPILAMOS LA PLANTILLA HANDLEBARS */
+    var template = Handlebars.compile(plantilla);
+
+    /*OBTENGO LA LISTA DE PRODUCTOS DE LA WEB*/
+    listaProductos = await apiProd.get();
+
+    /*ALMACENO LA LISTA OBTENIDA EN EL LOCALSTORAGE*/
+    guardarListaProductos(listaProductos);
+    // A TRAVES DE FUNCION TEMPLATE OBTENEMOS LA INTEGRACION DE LOS DATOS CON LA PLANTILLA
+    $("#lista").html(template({ listaProductos: listaProductos }));
+
+    const ul = $("#contenedorLista");
+    // componentHandler.upgradeElements(ul);
     componentHandler.upgradeElements(ul);
+  } catch (error) {
+    console.error("error en handlebars", error);
   }
-  crearLista = false;
 };
 
 const eventosAgregarBorrar = () => {
   // ingreso del nuevo producto
-  btnAgregar.addEventListener("click", () => {
-    const producto = inputIngresar.value;
+  btnAgregar.click(async () => {
+    //jquery
+    const nombre = inputIngresar.val(); //jquery
 
-    if (producto) {
-      listaProductos.push({ nombre: producto, cantidad: 1, precio: 0 });
-      renderLista(); //actualizo la lista para que aparesca el nuevo producto
-      inputIngresar.value = "";
+    if (nombre) {
+      // listaProductos.push({ nombre: producto, cantidad: 1, precio: 0 });
+
+      try {
+        const producto = { nombre: nombre, cantidad: 1, precio: 0 };
+        await apiProd.post(producto);
+        renderLista(); //actualizo la lista para que aparesca el nuevo producto
+        inputIngresar.val("");
+      } catch (error) {
+        console.error("Error entrada producto", error);
+      }
     }
   });
 
-  // ingreso del nuevo producto
-  btnBorrar.addEventListener("click", () => {
-    if (confirm("¿Desea borrar todos los productos?")) {
-      listaProductos = [];
-      renderLista();
+  // borrdo del nuevo producto
+  btnBorrar.click(() => {
+    //jquery
+    if (listaProductos.length) {
+      dialog.showModal();
     }
+    // if (confirm("¿Desea borrar todos los productos?")) {
+    //   listaProductos = [];
+    //   renderLista();
+    // }
+  });
+};
+
+// funcion mostrar ventana modal
+const mostrarModal = () => {
+  if (!dialog.showModal) {
+    dialogPolyfill.registerDialog(dialog);
+  }
+
+  //Aceptamos el borrado de todos los productos
+  $("dialog .aceptar").click(async () => {
+    // listaProductos = [];
+    dialog.close();
+    await apiProd.delAll();
+    renderLista();
+  });
+
+  $("dialog .cancelar").click(() => {
+    dialog.close();
   });
 };
 
 const registrarSw = () => {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      console.log("load");
+      // console.log("load");
       this.navigator.serviceWorker
         .register("/sw.js")
         .then(reg => {
-          console.log("el service worker se registro correctamente", reg);
+          // console.log("el service worker se registro correctamente", reg);
         })
         .catch(err => {
           console.error(
@@ -157,11 +161,96 @@ const registrarSw = () => {
   }
 };
 
+const handlebarsTest = () => {
+  // compile the template
+  // var template = Handlebars.compile("Handlebars <b>{{doesWhat}}</b>");
+  // // execute the compiled template and print the output to the console
+  // console.log(template({ doesWhat: "rocks!" }));
+};
+
+// const testCache = () => {
+//   if (window.caches) {
+//     console.log("el browser soporta caches");
+
+//     /*CREANDO ESPACIOS EN CACHE*/
+//     caches.open("cache-1");
+//     caches.open("cache-2");
+//     caches.open("cache-3");
+
+//     /*CHECKEADNO SI UN CACHE EXISTE*/
+//     caches.has("cache-2").then(rta => console.log(rta));
+
+//     /*BORRANDO UN CACHE*/
+//     caches.delete("cache-2").then(rta => console.log(rta));
+
+//     /*LISTANDO LOS CACHES*/
+//     caches.keys().then(rta => console.log(rta));
+
+//     /*-------------------------------------------*/
+//     /*ABRIENDO UN NUEVO CACHE Y TRABAJANDO CON EL*/
+//     /*-------------------------------------------*/
+//     caches.open("cache-v1.1").then(cache => {
+//       console.log(cache);
+
+//       /*AGREGANDO UN RECURSO AL CACHE*/
+//       // cache.add("./index.html");
+
+//       /*AGREGANDO VARIOS RECURSOS AL CACHE*/
+//       cache
+//         .addAll([
+//           "./index.html",
+//           "./css/estilos.css",
+//           "./images/supermercado.jpg",
+//         ])
+//         .then(() => {
+//           console.log("Recursos agregados");
+
+//           /*BORRANDO UN RECURSO DEL CACHE*/
+//           cache.delete("/css/estilos.css");
+
+//           /*VERIFICANDO SI UN RECURSO EXISTE EN EL CACHE*/
+
+//           cache.match("/index.html").then(rta => {
+//             if (rta) {
+//               console.log("recurso encontrado");
+//             } else {
+//               console.log("recurso no encontrado");
+//             }
+//           });
+
+//           /*CREO O MODIFICO EL CONTENIDO DE UN RECURSO DEL CACHE*/
+//           cache.put("/index.html", new Response("Hola mundo"));
+
+//           /*LISTO TODOS LOS RECURSOS QUE TIENE ESTE CACHE*/
+//           cache
+//             .keys()
+//             .then(recursos => console.log("recursos de cahce", recursos));
+
+//           cache.keys().then(recursos => {
+//             recursos.forEach(recurso => {
+//               console.log(recurso.url);
+//             });
+
+//             /*LISTO TODOS LOS NOMBRES DE LOS ESPACIOS DE CACHE EN CACHES (CacheStorage)*/
+//             caches
+//               .keys()
+//               .then(nombres => console.log("nombres de caches", nombres));
+//           });
+//         });
+//     });
+//   } else {
+//     console.log("el browser no soporta caches");
+//   }
+// };
+
 const start = () => {
-  console.log(document.querySelector("title").textContent);
-  renderLista();
-  eventosAgregarBorrar();
+  // console.log(document.querySelector("title").textContent);
   registrarSw();
+  eventosAgregarBorrar();
+  mostrarModal();
+  // handlebarsTest();
+  // testCache();
+  renderLista();
 };
 
 /*------------------------------------------------*/
