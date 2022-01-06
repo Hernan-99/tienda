@@ -17,10 +17,23 @@ let listaProductos = [
 /*---------------FUNCIONES GLOBALES---------------*/
 /*------------------------------------------------*/
 
+/*-------------------------------------------*/
+/*----------MANEJO DEL LOCALSTORAGE----------*/
+/*-------------------------------------------*/
 const guardarListaProductos = lista => {
   let productos = JSON.stringify(lista);
   localStorage.setItem("LISTA", productos);
 };
+
+const leerListaProductos = () => {
+  let lista = [];
+  let productos = localStorage.getItem("LISTA");
+  if (productos) {
+    lista = JSON.parse(productos);
+  }
+  return lista;
+};
+/*-------------------------------------------*/
 
 async function borrarProducto(id) {
   console.log("hola", id);
@@ -44,6 +57,7 @@ const cambiarValor = async (tipo, id, el) => {
 
   // console.dir(el);
   listaProductos[index][tipo] = valor;
+  guardarListaProductos(listaProductos);
 
   //Actualiza el producto en el backend
   const prod = listaProductos[index];
@@ -78,7 +92,8 @@ const renderLista = async () => {
     /*ALMACENO LA LISTA OBTENIDA EN EL LOCALSTORAGE*/
     guardarListaProductos(listaProductos);
     // A TRAVES DE FUNCION TEMPLATE OBTENEMOS LA INTEGRACION DE LOS DATOS CON LA PLANTILLA
-    $("#lista").html(template({ listaProductos: listaProductos }));
+    // $("#lista").html(template({ listaProductos: listaProductos }));
+    $("#lista").html(template({ listaProductos: listaProductos })); //simplifico
 
     const ul = $("#contenedorLista");
     // componentHandler.upgradeElements(ul);
@@ -250,6 +265,7 @@ const start = () => {
   mostrarModal();
   // handlebarsTest();
   // testCache();
+  // console.log(leerListaProductos());
   renderLista();
 };
 

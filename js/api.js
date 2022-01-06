@@ -90,7 +90,7 @@ const apiProd = (function () {
     }, 2000);
   };
 
-  console.warn("libreria instalada");
+  // console.warn("libreria instalada");
 
   // PUBLICACION
   return {
