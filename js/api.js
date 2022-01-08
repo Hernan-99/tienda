@@ -11,7 +11,7 @@ const apiProd = (function () {
     try {
       let productos = await $.ajax({ url: getURL() });
       return productos;
-    } catch (err) {
+    } catch (error) {
       console.error("Error GET", err);
       let productos = leerListaProductos();
       return productos;
