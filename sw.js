@@ -1,6 +1,6 @@
-const CACHE_STATIC_NAME = "static-v011";
-const CACHE_INMUTABLE_NAME = "inmutable-v011";
-const CACHE_DYNAMIC_NAME = "dynamic-v011";
+const CACHE_STATIC_NAME = "static-v0.1";
+const CACHE_INMUTABLE_NAME = "inmutable-v0.1";
+const CACHE_DYNAMIC_NAME = "dynamic-v0.1";
 
 self.addEventListener("install", e => {
   console.log("sw instalado");
