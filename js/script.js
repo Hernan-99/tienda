@@ -29,7 +29,12 @@ const leerListaProductos = () => {
   let lista = [];
   let productos = localStorage.getItem("LISTA");
   if (productos) {
-    lista = JSON.parse(productos);
+    try {
+      lista = JSON.parse(productos);
+    } catch {
+      lista = [];
+      guardarListaProductos(lista);
+    }
   }
   return lista;
 };
@@ -160,9 +165,29 @@ const registrarSw = () => {
     window.addEventListener("load", () => {
       // console.log("load");
       this.navigator.serviceWorker
-        .register("/sw.js")
+        .register("./sw.js")
         .then(reg => {
           // console.log("el service worker se registro correctamente", reg);
+
+          /*aca vamos a hacer un skipwaiting automatico escuchando el cambio de estado
+        del SW para luego reiniciarlo */
+
+          //evento que detecta cambios del sw
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              console.warn("SW----->", installingWorker.state);
+              if (installingWorker.state == "activated") {
+                console.log("REINICIANDO...");
+
+                //reinicio la pagina a los 2 segundos
+                setTimeout(() => {
+                  console.log("Ok");
+                  location.reload();
+                }, 2000);
+              }
+            };
+          };
         })
         .catch(err => {
           console.error(
